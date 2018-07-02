@@ -32,6 +32,7 @@ import com.netflix.spinnaker.fiat.providers.ProviderException;
 import com.netflix.spinnaker.fiat.providers.ResourceProvider;
 import com.netflix.spinnaker.kork.eureka.RemoteStatusChangedEvent;
 import com.netflix.spinnaker.kork.lock.LockManager;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -64,7 +65,7 @@ public class UserRolesSyncer implements ApplicationListener<RemoteStatusChangedE
   private final ResourceProvidersHealthIndicator healthIndicator;
 
   private final long retryIntervalMs;
-  private final long syncDelayMs;
+  @Getter private final long syncDelayMs;
   private final long syncFailureDelayMs;
   private final long syncDelayTimeoutMs;
 
@@ -78,7 +79,7 @@ public class UserRolesSyncer implements ApplicationListener<RemoteStatusChangedE
                          ResourceProvider<ServiceAccount> serviceAccountProvider,
                          ResourceProvidersHealthIndicator healthIndicator,
                          @Value("${fiat.writeMode.retryIntervalMs:10000}") long retryIntervalMs,
-                         @Value("${fiat.writeMode.syncDelayMs:600000}") long syncDelayMs,
+                         @Value("${fiat.writeMode.syncDelayMs:10000}") long syncDelayMs,
                          @Value("${fiat.writeMode.syncFailureDelayMs:600000}") long syncFailureDelayMs,
                          @Value("${fiat.writeMode.syncDelayTimeoutMs:30000}") long syncDelayTimeoutMs) {
     this.discoveryClient = discoveryClient;
@@ -105,7 +106,7 @@ public class UserRolesSyncer implements ApplicationListener<RemoteStatusChangedE
     isEnabled.set(isInService());
   }
 
-  @Scheduled(fixedDelay = 30000L)
+  @Scheduled(fixedDelayString = "#{userRolesSyncer.getSyncDelayMs()}")
   public void schedule() {
     if (syncDelayMs < 0 || !isEnabled.get()) {
       return;
