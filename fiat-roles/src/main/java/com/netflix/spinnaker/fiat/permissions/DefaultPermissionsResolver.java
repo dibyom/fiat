@@ -84,7 +84,7 @@ public class DefaultPermissionsResolver implements PermissionsResolver {
     List<Role> roles;
     try {
       log.debug("Loading roles for user " + user);
-      roles = userRolesProvider.loadRoles(user);
+      roles = userRolesProvider.loadRoles(user.getId());
       log.debug("Got roles " + roles + " for user " + user);
     } catch (ProviderException pe) {
       throw new PermissionResolutionException("Failed to resolve user permission for user " + user.getId(), pe);
@@ -141,7 +141,11 @@ public class DefaultPermissionsResolver implements PermissionsResolver {
   }
 
   private Map<String, Collection<Role>> getAndMergeUserRoles(@NonNull Collection<ExternalUser> users) {
-    Map<String, Collection<Role>> userToRoles = userRolesProvider.multiLoadRoles(users);
+    List<String> usernames = users.stream()
+                                  .map(ExternalUser::getId)
+                                  .collect(Collectors.toList());
+
+    Map<String, Collection<Role>> userToRoles = userRolesProvider.multiLoadRoles(usernames);
 
     users.forEach(user -> {
       userToRoles.computeIfAbsent(user.getId(), ignored -> new ArrayList<>())

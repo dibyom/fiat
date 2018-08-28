@@ -20,7 +20,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.netflix.spinnaker.fiat.model.resources.Role;
-import com.netflix.spinnaker.fiat.permissions.ExternalUser;
 import com.netflix.spinnaker.fiat.roles.UserRolesProvider;
 import com.netflix.spinnaker.fiat.roles.github.client.GitHubClient;
 import com.netflix.spinnaker.fiat.roles.github.model.Team;
@@ -101,9 +100,7 @@ public class GithubTeamsUserRolesProvider implements UserRolesProvider, Initiali
   }
 
   @Override
-  public List<Role> loadRoles(ExternalUser user) {
-    String username = user.getId();
-
+  public List<Role> loadRoles(String username) {
     log.debug("loadRoles for user " + username);
     if (StringUtils.isEmpty(username) || StringUtils.isEmpty(gitHubProperties.getOrganization())) {
       return new ArrayList<>();
@@ -219,13 +216,13 @@ public class GithubTeamsUserRolesProvider implements UserRolesProvider, Initiali
   }
 
   @Override
-  public Map<String, Collection<Role>> multiLoadRoles(Collection<ExternalUser> users) {
-    if (users == null || users.isEmpty()) {
+  public Map<String, Collection<Role>> multiLoadRoles(Collection<String> userEmails) {
+    if (userEmails == null || userEmails.isEmpty()) {
       return new HashMap<>();
     }
 
     val emailGroupsMap = new HashMap<String, Collection<Role>>();
-    users.forEach(u -> emailGroupsMap.put(u.getId(), loadRoles(u)));
+    userEmails.forEach(email -> emailGroupsMap.put(email, loadRoles(email)));
 
     return emailGroupsMap;
   }

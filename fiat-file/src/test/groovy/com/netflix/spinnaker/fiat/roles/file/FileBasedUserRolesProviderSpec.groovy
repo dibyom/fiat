@@ -17,7 +17,6 @@
 package com.netflix.spinnaker.fiat.roles.file
 
 import com.google.common.io.Resources
-import com.netflix.spinnaker.fiat.permissions.ExternalUser
 import spock.lang.Specification
 
 class FileBasedUserRolesProviderSpec extends Specification {
@@ -31,25 +30,21 @@ class FileBasedUserRolesProviderSpec extends Specification {
     FileBasedUserRolesProvider provider = new FileBasedUserRolesProvider(configProps: configProps)
 
     when:
-    def result1 = provider.loadRoles(externalUser("batman"))
-    def result2 = provider.loadRoles(externalUser("foo"))
+    def result1 = provider.loadRoles("batman")
+    def result2 = provider.loadRoles("foo")
 
     then:
     result1.name.containsAll(["crimefighter", "jokerjailer"])
     result2.name.containsAll(["bar", "baz"])
 
     when:
-    def result3 = provider.multiLoadRoles([externalUser("batman")])
-    def result4 = provider.multiLoadRoles([externalUser("batman"), externalUser("foo")])
+    def result3 = provider.multiLoadRoles(["batman"])
+    def result4 = provider.multiLoadRoles(["batman", "foo"])
 
     then:
     result3.containsKey("batman")
     !result3.containsKey("foo")
 
     result4.keySet().containsAll("batman", "foo")
-  }
-
-  private static ExternalUser externalUser(String id) {
-    return new ExternalUser().setId(id)
   }
 }

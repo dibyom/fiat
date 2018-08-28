@@ -57,9 +57,7 @@ public class LdapUserRolesProvider implements UserRolesProvider {
   private LdapConfig.ConfigProps configProps;
 
   @Override
-  public List<Role> loadRoles(ExternalUser user) {
-    String userId = user.getId();
-
+  public List<Role> loadRoles(String userId) {
     log.debug("loadRoles for user " + userId);
     if (StringUtils.isEmpty(configProps.getGroupSearchBase())) {
       return new ArrayList<>();
@@ -94,15 +92,15 @@ public class LdapUserRolesProvider implements UserRolesProvider {
   }
 
   @Override
-  public Map<String, Collection<Role>> multiLoadRoles(Collection<ExternalUser> users) {
+  public Map<String, Collection<Role>> multiLoadRoles(Collection<String> userIds) {
     if (StringUtils.isEmpty(configProps.getGroupSearchBase())) {
       return new HashMap<>();
     }
 
     // ExternalUser is used here as a simple data type to hold the username/roles combination.
-    return users.stream()
-        .map(u -> u.setExternalRoles(loadRoles(u)))
-        .collect(Collectors.toMap(ExternalUser::getId, ExternalUser::getExternalRoles));
+    return userIds.stream()
+                  .map(userId -> new ExternalUser().setId(userId).setExternalRoles(loadRoles(userId)))
+                  .collect(Collectors.toMap(ExternalUser::getId, ExternalUser::getExternalRoles));
   }
 
   private String getUserFullDn(String userId) {

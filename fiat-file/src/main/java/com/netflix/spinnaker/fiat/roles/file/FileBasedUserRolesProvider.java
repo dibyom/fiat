@@ -19,7 +19,6 @@ package com.netflix.spinnaker.fiat.roles.file;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.netflix.spinnaker.fiat.model.resources.Role;
-import com.netflix.spinnaker.fiat.permissions.ExternalUser;
 import com.netflix.spinnaker.fiat.roles.UserRolesProvider;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -59,19 +58,18 @@ public class FileBasedUserRolesProvider implements UserRolesProvider {
   }
 
   @Override
-  public List<Role> loadRoles(ExternalUser user) {
+  public List<Role> loadRoles(String userId) {
     try {
-      return new ArrayList<>(parse().get(user.getId()));
+      return new ArrayList<>(parse().get(userId));
     } catch (IOException io) {
-      log.error("Couldn't load roles for user " + user.getId() + " from file", io);
+      log.error("Couldn't load roles for user " + userId + " from file", io);
     }
     return Collections.emptyList();
   }
 
   @Override
-  public Map<String, Collection<Role>> multiLoadRoles(Collection<ExternalUser> users) {
+  public Map<String, Collection<Role>> multiLoadRoles(Collection<String> userIds) {
     try {
-      Collection<String> userIds = users.stream().map(ExternalUser::getId).collect(Collectors.toList());
       return parse().entrySet()
                     .stream()
                     .filter(e -> userIds.contains(e.getKey()))
