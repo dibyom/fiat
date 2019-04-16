@@ -65,9 +65,9 @@ public abstract class BaseProvider<R extends Resource> implements ResourceProvid
   }
 
   @Override
-  public Set<R> getAll() throws ProviderException {
+  public Set<R> getAll(boolean refresh) throws ProviderException {
     try {
-      return ImmutableSet.copyOf(cache.get(CACHE_KEY, this::loadAll));
+      return ImmutableSet.copyOf(cache.get(CACHE_KEY, () -> this.loadAll(refresh)));
     } catch (ExecutionException | UncheckedExecutionException e) {
       if (e.getCause() instanceof ProviderException) {
         throw (ProviderException) e.getCause();
@@ -89,5 +89,5 @@ public abstract class BaseProvider<R extends Resource> implements ResourceProvid
         .build();
   }
 
-  protected abstract Set<R> loadAll() throws ProviderException;
+  protected abstract Set<R> loadAll(boolean refresh) throws ProviderException;
 }

@@ -56,16 +56,16 @@ public class DefaultApplicationProvider extends BaseProvider<Application> implem
   }
 
   @Override
-  protected Set<Application> loadAll() throws ProviderException {
+  protected Set<Application> loadAll(boolean refresh) throws ProviderException {
     try {
       Map<String, Application> appByName = front50Service
-          .getAllApplicationPermissions()
+          .getAllApplicationPermissions(refresh)
           .stream()
           .collect(Collectors.toMap(Application::getName,
                                     Function.identity()));
 
       clouddriverService
-          .getApplications()
+          .getApplications(refresh)
           .stream()
           .filter(app -> !appByName.containsKey(app.getName()))
           .forEach(app -> appByName.put(app.getName(), app));

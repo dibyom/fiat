@@ -57,19 +57,19 @@ public class Front50Service implements HealthTrackable, InitializingBean {
     }
   }
 
-  public List<Application> getAllApplicationPermissions() {
+  public List<Application> getAllApplicationPermissions(boolean refresh) {
+    if (refresh){
+      refreshApplications();
+    }
     return applicationCache.get();
   }
 
-  public List<ServiceAccount> getAllServiceAccounts() {
+  public List<ServiceAccount> getAllServiceAccounts(boolean refresh) {
+    if (refresh) {
+      refreshServiceAccounts();
+    }
     return serviceAccountCache.get();
   }
-
-  private static void logFallback(String resource, Throwable cause) {
-    String message = cause != null ? "Cause: " + cause.getMessage() : "";
-    log.info("Falling back to {} cache. {}", resource, message);
-  }
-
 
   @Scheduled(fixedDelayString = "${fiat.front50RefreshMs:30000}")
   public void refreshApplications() {

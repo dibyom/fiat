@@ -52,7 +52,10 @@ public class IgorService implements HealthTrackable, InitializingBean {
     }
   }
 
-  public List<BuildService> getAllBuildServices() {
+  public List<BuildService> getAllBuildServices(boolean refresh) {
+    if (refresh) {
+      refreshBuildServices();
+    }
     return buildServicesCache.get();
   }
 

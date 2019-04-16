@@ -39,9 +39,9 @@ public class DefaultBuildServiceProvider extends BaseProvider<BuildService> impl
   }
 
   @Override
-  protected Set<BuildService> loadAll() throws ProviderException {
+  protected Set<BuildService> loadAll(boolean refresh) throws ProviderException {
     try {
-      return new HashSet<>(igorService.getAllBuildServices());
+      return new HashSet<>(igorService.getAllBuildServices(refresh));
     } catch (Exception e) {
       throw new ProviderException(this.getClass(), e.getCause());
     }

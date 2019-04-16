@@ -44,9 +44,9 @@ public class DefaultAccountProvider extends BaseProvider<Account> implements Res
   }
 
   @Override
-  protected Set<Account> loadAll() throws ProviderException {
+  protected Set<Account> loadAll(boolean refresh) throws ProviderException {
     try {
-      return new HashSet<>(clouddriverService.getAccounts());
+      return new HashSet<>(clouddriverService.getAccounts(refresh));
     } catch (Exception e) {
       throw new ProviderException(this.getClass(), e.getCause());
     }

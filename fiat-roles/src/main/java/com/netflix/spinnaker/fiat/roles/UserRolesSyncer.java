@@ -23,6 +23,7 @@ import com.netflix.spectator.api.Registry;
 import com.netflix.spinnaker.fiat.config.ResourceProvidersHealthIndicator;
 import com.netflix.spinnaker.fiat.config.UnrestrictedResourceConfig;
 import com.netflix.spinnaker.fiat.model.UserPermission;
+import com.netflix.spinnaker.fiat.model.resources.Resource;
 import com.netflix.spinnaker.fiat.model.resources.Role;
 import com.netflix.spinnaker.fiat.model.resources.ServiceAccount;
 import com.netflix.spinnaker.fiat.permissions.ExternalUser;
@@ -65,7 +66,7 @@ public class UserRolesSyncer implements ApplicationListener<RemoteStatusChangedE
   private final PermissionsResolver permissionsResolver;
   private final ResourceProvider<ServiceAccount> serviceAccountProvider;
   private final ResourceProvidersHealthIndicator healthIndicator;
-
+  private List<ResourceProvider<? extends Resource>> resourceProviders;
   private final long retryIntervalMs;
   private final long syncDelayMs;
   private final long syncFailureDelayMs;
@@ -83,6 +84,7 @@ public class UserRolesSyncer implements ApplicationListener<RemoteStatusChangedE
                          PermissionsResolver permissionsResolver,
                          ResourceProvider<ServiceAccount> serviceAccountProvider,
                          ResourceProvidersHealthIndicator healthIndicator,
+                         List<ResourceProvider<? extends Resource>> resourceProviders,
                          @Value("${fiat.writeMode.retryIntervalMs:10000}") long retryIntervalMs,
                          @Value("${fiat.writeMode.syncDelayMs:600000}") long syncDelayMs,
                          @Value("${fiat.writeMode.syncFailureDelayMs:600000}") long syncFailureDelayMs,
@@ -92,6 +94,7 @@ public class UserRolesSyncer implements ApplicationListener<RemoteStatusChangedE
     this.lockManager = lockManager;
     this.permissionsRepository = permissionsRepository;
     this.permissionsResolver = permissionsResolver;
+    this.resourceProviders = resourceProviders;
     this.serviceAccountProvider = serviceAccountProvider;
     this.healthIndicator = healthIndicator;
 
@@ -151,6 +154,8 @@ public class UserRolesSyncer implements ApplicationListener<RemoteStatusChangedE
     }
 
     while (true) {
+      // Refresh the resource provider caches so that we do not use stale data for syncs.
+      resourceProviders.forEach(r -> r.getAll(true));
       try {
         Map<String, UserPermission> combo = new HashMap<>();
         //force a refresh of the unrestricted user in case the backing repository is empty:

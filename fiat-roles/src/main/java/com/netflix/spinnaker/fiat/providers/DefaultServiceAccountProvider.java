@@ -50,9 +50,9 @@ public class DefaultServiceAccountProvider extends BaseProvider<ServiceAccount> 
   }
 
   @Override
-  protected Set<ServiceAccount> loadAll() throws ProviderException {
+  protected Set<ServiceAccount> loadAll(boolean refresh) throws ProviderException {
     try {
-      return new HashSet<>(front50Service.getAllServiceAccounts());
+      return new HashSet<>(front50Service.getAllServiceAccounts(refresh));
     } catch (Exception e) {
       throw new ProviderException(this.getClass(), e.getCause());
     }

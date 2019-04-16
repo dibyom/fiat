@@ -59,11 +59,17 @@ public class ClouddriverService implements HealthTrackable, InitializingBean {
     }
   }
 
-  public List<Account> getAccounts() {
+  public List<Account> getAccounts(boolean refresh) {
+    if (refresh) {
+      refreshAccounts();
+    }
     return accountCache.get();
   }
 
-  public List<Application> getApplications() {
+  public List<Application> getApplications(boolean refresh) {
+    if (refresh) {
+      refreshApplications();
+    }
     return applicationCache.get();
   }
 
